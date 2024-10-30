@@ -35,17 +35,31 @@ export function useYoutubeDownload() {
         }
       });
 
-      // Map the API response to our VideoData interface
-      const formats = response.data.formats.map((format: any) => ({
+      // Combine and map both regular formats and adaptive formats
+      const regularFormats = response.data.formats.map((format: any) => ({
         url: format.url,
         quality: format.qualityLabel || format.quality || 'Audio',
         format: format.container || 'mp4'
       }));
 
+      const adaptiveFormats = response.data.adaptiveFormats.map((format: any) => ({
+        url: format.url,
+        quality: format.qualityLabel || (format.quality === 'tiny' ? 'Audio Only' : format.quality),
+        format: `${format.container || 'mp4'}${format.hasAudio ? ' with Audio' : format.hasVideo ? ' (Video Only)' : ' (Audio Only)'}`
+      }));
+
+      // Combine all formats and remove duplicates
+      const allFormats = [...regularFormats, ...adaptiveFormats]
+        .filter((format, index, self) => 
+          index === self.findIndex((f) => 
+            f.quality === format.quality && f.format === format.format
+          )
+        );
+
       setVideoData({
         title: response.data.title,
         thumbnail: response.data.thumbnail[response.data.thumbnail.length - 1]?.url || response.data.thumbnail[0]?.url,
-        formats: formats
+        formats: allFormats
       });
     } catch (error) {
       toast({
