@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface VideoInfoProps {
   title: string;
@@ -13,19 +14,24 @@ interface VideoInfoProps {
 }
 
 export function VideoInfo({ title, thumbnail, formats }: VideoInfoProps) {
+  const { toast } = useToast();
+
   const handleDownload = async (url: string, quality: string, format: string) => {
     try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
+      // Create an anchor element
       const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = `${title}-${quality}.${format.toLowerCase()}`;
+      link.href = url;
+      link.setAttribute('download', `${title}-${quality}.${format.toLowerCase()}`);
+      link.setAttribute('target', '_blank');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "There was an error downloading the video. Please try again.",
+        variant: "destructive",
+      });
       console.error('Download failed:', error);
     }
   };
