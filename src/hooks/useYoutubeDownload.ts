@@ -2,14 +2,16 @@ import { useState } from "react";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 
+interface VideoFormat {
+  url: string;
+  quality: string;
+  format: string;
+}
+
 interface VideoData {
   title: string;
   thumbnail: string;
-  formats: Array<{
-    url: string;
-    quality: string;
-    format: string;
-  }>;
+  formats: VideoFormat[];
 }
 
 export function useYoutubeDownload() {
@@ -21,28 +23,29 @@ export function useYoutubeDownload() {
     setIsLoading(true);
     try {
       const response = await axios.request({
-        method: "GET",
-        url: "https://ytstream-download-youtube-videos.p.rapidapi.com/dl",
-        params: { id: videoId },
-        headers: {
-          "x-rapidapi-key": "0bfbe5b37amsh7b17fd001cb3b17p12220ejsnad8ca531965a",
-          "x-rapidapi-host": "ytstream-download-youtube-videos.p.rapidapi.com",
+        method: 'GET',
+        url: 'https://yt-api.p.rapidapi.com/dl',
+        params: {
+          id: videoId,
+          cgeo: 'DE'
         },
+        headers: {
+          'x-rapidapi-key': '0bfbe5b37amsh7b17fd001cb3b17p12220ejsnad8ca531965a',
+          'x-rapidapi-host': 'yt-api.p.rapidapi.com'
+        }
       });
 
-      // Filter and map formats to include various qualities
-      const formats = response.data.formats
-        .filter((format: any) => format.qualityLabel || format.audioQuality)
-        .map((format: any) => ({
-          url: format.url,
-          quality: format.qualityLabel || `Audio ${format.audioQuality}`,
-          format: format.container,
-        }));
+      // Map the API response to our VideoData interface
+      const formats = response.data.formats.map((format: any) => ({
+        url: format.url,
+        quality: format.qualityLabel || format.quality || 'Audio',
+        format: format.container || 'mp4'
+      }));
 
       setVideoData({
         title: response.data.title,
-        thumbnail: response.data.thumbnail[response.data.thumbnail.length - 1]?.url || response.data.thumbnail.url,
-        formats,
+        thumbnail: response.data.thumbnail[response.data.thumbnail.length - 1]?.url || response.data.thumbnail[0]?.url,
+        formats: formats
       });
     } catch (error) {
       toast({
@@ -50,6 +53,7 @@ export function useYoutubeDownload() {
         description: "Failed to fetch video data. Please try again.",
         variant: "destructive",
       });
+      console.error('Error fetching video:', error);
     } finally {
       setIsLoading(false);
     }
