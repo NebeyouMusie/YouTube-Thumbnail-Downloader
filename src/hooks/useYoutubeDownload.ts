@@ -35,20 +35,24 @@ export function useYoutubeDownload() {
         }
       });
 
-      // Combine and map both regular formats and adaptive formats
-      const regularFormats = response.data.formats.map((format: any) => ({
-        url: format.url,
-        quality: format.qualityLabel || format.quality || 'Audio',
-        format: format.container || 'mp4'
-      }));
+      // Only include formats that have both video and audio
+      const regularFormats = response.data.formats
+        .filter((format: any) => format.hasVideo && format.hasAudio)
+        .map((format: any) => ({
+          url: format.url,
+          quality: format.qualityLabel || format.quality || 'Standard',
+          format: format.container || 'mp4'
+        }));
 
-      const adaptiveFormats = response.data.adaptiveFormats.map((format: any) => ({
-        url: format.url,
-        quality: format.qualityLabel || (format.quality === 'tiny' ? 'Audio Only' : format.quality),
-        format: `${format.container || 'mp4'}${format.hasAudio ? ' with Audio' : format.hasVideo ? ' (Video Only)' : ' (Audio Only)'}`
-      }));
+      const adaptiveFormats = response.data.adaptiveFormats
+        .filter((format: any) => format.hasVideo && format.hasAudio)
+        .map((format: any) => ({
+          url: format.url,
+          quality: format.qualityLabel || format.quality,
+          format: format.container || 'mp4'
+        }));
 
-      // Combine all formats and remove duplicates
+      // Combine formats and remove duplicates
       const allFormats = [...regularFormats, ...adaptiveFormats]
         .filter((format, index, self) => 
           index === self.findIndex((f) => 
