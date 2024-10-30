@@ -13,6 +13,7 @@ export function VideoInfo({ title, thumbnail }: VideoInfoProps) {
 
   const handleDownload = async () => {
     try {
+      // Use a CORS proxy to fetch the image
       const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(thumbnail)}`;
       const response = await fetch(proxyUrl);
       const blob = await response.blob();
@@ -42,8 +43,7 @@ export function VideoInfo({ title, thumbnail }: VideoInfoProps) {
 
   const handleCopy = async () => {
     try {
-      const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(thumbnail)}`;
-      const response = await fetch(proxyUrl);
+      const response = await fetch(thumbnail);
       const blob = await response.blob();
       await navigator.clipboard.write([
         new ClipboardItem({
