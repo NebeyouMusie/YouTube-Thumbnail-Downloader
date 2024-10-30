@@ -30,15 +30,18 @@ export function useYoutubeDownload() {
         },
       });
 
-      const formats = response.data.formats.map((format: any) => ({
-        url: format.url,
-        quality: format.qualityLabel || "Audio",
-        format: format.container,
-      }));
+      // Filter and map formats to include various qualities
+      const formats = response.data.formats
+        .filter((format: any) => format.qualityLabel || format.audioQuality)
+        .map((format: any) => ({
+          url: format.url,
+          quality: format.qualityLabel || `Audio ${format.audioQuality}`,
+          format: format.container,
+        }));
 
       setVideoData({
         title: response.data.title,
-        thumbnail: response.data.thumbnail.url,
+        thumbnail: response.data.thumbnail[response.data.thumbnail.length - 1]?.url || response.data.thumbnail.url,
         formats,
       });
     } catch (error) {
