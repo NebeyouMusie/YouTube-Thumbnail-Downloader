@@ -12,10 +12,10 @@ const Index = () => {
       <div className="container flex flex-col items-center justify-center min-h-screen gap-8 py-16">
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl font-poppins">
-            YouTube Downloader
+            YouTube Thumbnail Downloader
           </h1>
           <p className="text-lg text-muted-foreground font-poppins">
-            Download your favorite YouTube videos in various formats
+            Download high-quality thumbnails from YouTube videos
           </p>
         </div>
 

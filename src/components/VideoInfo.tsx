@@ -6,25 +6,36 @@ import { useToast } from "@/components/ui/use-toast";
 interface VideoInfoProps {
   title: string;
   thumbnail: string;
-  formats: Array<{
-    url: string;
-    quality: string;
-    format: string;
-  }>;
 }
 
-export function VideoInfo({ title, thumbnail, formats }: VideoInfoProps) {
+export function VideoInfo({ title, thumbnail }: VideoInfoProps) {
   const { toast } = useToast();
 
-  const handleDownload = (url: string, quality: string, format: string) => {
-    // Open in new tab instead of trying to download directly
-    window.open(url, '_blank');
-    
-    toast({
-      title: "Download Started",
-      description: "The video will open in a new tab. You can save it from there.",
-      duration: 5000,
-    });
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(thumbnail);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_thumbnail.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Thumbnail downloaded successfully!",
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to download thumbnail. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -38,28 +49,13 @@ export function VideoInfo({ title, thumbnail, formats }: VideoInfoProps) {
           />
         </div>
         <h2 className="text-xl font-semibold font-poppins">{title}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {Object.entries(formats.reduce((acc, format) => {
-            const key = format.quality;
-            if (!acc[key]) {
-              acc[key] = [];
-            }
-            acc[key].push(format);
-            return acc;
-          }, {} as Record<string, typeof formats>)).map(([quality, formats]) =>
-            formats.map((format, index) => (
-              <Button
-                key={`${quality}-${index}`}
-                variant="outline"
-                onClick={() => handleDownload(format.url, format.quality, format.format)}
-                className="flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                {quality} {format.format}
-              </Button>
-            ))
-          )}
-        </div>
+        <Button
+          onClick={handleDownload}
+          className="flex items-center gap-2"
+        >
+          <Download className="w-4 h-4" />
+          Download Thumbnail
+        </Button>
       </div>
     </Card>
   );
