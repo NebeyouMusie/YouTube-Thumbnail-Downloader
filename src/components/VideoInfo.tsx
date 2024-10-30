@@ -13,7 +13,9 @@ export function VideoInfo({ title, thumbnail }: VideoInfoProps) {
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(thumbnail);
+      // Use a CORS proxy to fetch the image
+      const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(thumbnail)}`;
+      const response = await fetch(proxyUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -35,6 +37,7 @@ export function VideoInfo({ title, thumbnail }: VideoInfoProps) {
         description: "Failed to download thumbnail. Please try again.",
         variant: "destructive",
       });
+      console.error('Download error:', error);
     }
   };
 
