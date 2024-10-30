@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, Copy } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface VideoInfoProps {
@@ -41,6 +41,31 @@ export function VideoInfo({ title, thumbnail }: VideoInfoProps) {
     }
   };
 
+  const handleCopy = async () => {
+    try {
+      const response = await fetch(thumbnail);
+      const blob = await response.blob();
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          [blob.type]: blob
+        })
+      ]);
+      
+      toast({
+        title: "Success",
+        description: "Thumbnail copied to clipboard!",
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy thumbnail. Please try again.",
+        variant: "destructive",
+      });
+      console.error('Copy error:', error);
+    }
+  };
+
   return (
     <Card className="w-full max-w-2xl p-6 animate-fadeIn">
       <div className="flex flex-col gap-4">
@@ -52,13 +77,23 @@ export function VideoInfo({ title, thumbnail }: VideoInfoProps) {
           />
         </div>
         <h2 className="text-xl font-semibold font-poppins">{title}</h2>
-        <Button
-          onClick={handleDownload}
-          className="flex items-center gap-2"
-        >
-          <Download className="w-4 h-4" />
-          Download Thumbnail
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleDownload}
+            className="flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Download Thumbnail
+          </Button>
+          <Button
+            onClick={handleCopy}
+            variant="secondary"
+            className="flex items-center gap-2"
+          >
+            <Copy className="w-4 h-4" />
+            Copy Thumbnail
+          </Button>
+        </div>
       </div>
     </Card>
   );
