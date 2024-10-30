@@ -44,7 +44,7 @@ export function VideoInput({ onSubmit, isLoading }: VideoInputProps) {
         className="flex-1"
       />
       <Button type="submit" disabled={isLoading || !url}>
-        {isLoading ? "Loading..." : "Download"}
+        {isLoading ? "Loading..." : "GetThumbnail"}
       </Button>
     </form>
   );
